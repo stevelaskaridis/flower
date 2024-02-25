@@ -207,7 +207,7 @@ def main(args: Any) -> None:
             "supported"
         )
 
-    model = get_net(args.model, args.p_s, device=device)
+    model = get_net(args.model, args.p_s, device=device, checkpoint=args.checkpoint_path)
     if args.checkpoint_path:
         get_eval_fn(args, model_path, testloader, device)(args.evaluate_every, get_parameters(model), {})
         exit(1)

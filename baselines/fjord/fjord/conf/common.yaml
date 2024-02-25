@@ -5,6 +5,7 @@ logfile: run.log
 
 manual_seed: 123
 model: resnet18
+checkpoint_path: NULL
 lda: NULL
 num_clients: 100
 data_path: "./data"

@@ -19,6 +19,7 @@ from .od.models.utils import (
     create_linear_layer,
 )
 from .od.samplers import BaseSampler, ODSampler
+from .utils.logger import Logger
 
 
 class BasicBlock(nn.Module):
@@ -170,6 +171,7 @@ def get_net(
     model_name: str,
     p_s: List[float],
     device: torch.device,
+    checkpoint: Optional[str] = None,
 ) -> torch.nn.Module:
     """Initialise model.
 
@@ -180,6 +182,9 @@ def get_net(
     """
     if model_name == "resnet18":
         net = ResNet18(od=True, p_s=p_s).to(device)
+        if checkpoint:
+            Logger.get().info(f"Loading model from {checkpoint}")
+            net.load_state_dict(torch.load(checkpoint))
     else:
         raise ValueError(f"Model {model_name} is not supported")
 
