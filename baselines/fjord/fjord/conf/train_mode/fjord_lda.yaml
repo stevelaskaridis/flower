@@ -1,0 +1,15 @@
+# @package _global_
+---
+defaults:
+  - ../common@
+
+dataset: cifar10_lda
+lda: 0.1
+eval_every_client: true
+lr: 0.01
+p_s:
+  - 0.25
+  - 0.5
+  - 0.75
+  - 1.0
+knowledge_distillation: true
