@@ -16,6 +16,8 @@ from omegaconf import OmegaConf, open_dict
 from .client import FJORD_CONFIG_TYPE, FjORDClient, get_agg_config
 from .dataset import load_data
 from .models import get_net
+from .datasets import get_num_clients
+from .datasets.utils import prepare_dataset
 from .server import get_eval_fn
 from .strategy import FjORDFedAVG
 from .utils.logger import Logger
@@ -182,12 +184,15 @@ def main(args: Any) -> None:
         f"{torch.__version__} and Flower {fl.__version__}"
     )
 
+
     trainloader, testloader = load_data(
         path, cid=0, seed=args.manual_seed, train_bs=args.batch_size
     )
     NUM_CLIENTS = args.num_clients
     if args.client_tier_allocation == "uniform":
-        cid_to_max_p = {cid: (cid // 20) * 0.2 + 0.2 for cid in range(100)}
+        num_clients_per_tier = NUM_CLIENTS // len(args.p_s)
+        p_step = 1 / len(args.p_s)
+        cid_to_max_p = {cid: (cid // num_clients_per_tier) * p_step + p_step for cid in range(100)}
     else:
         raise ValueError(
             f"Client to tier allocation strategy "
@@ -196,6 +201,9 @@ def main(args: Any) -> None:
         )
 
     model = get_net(args.model, args.p_s, device=device)
+    if args.checkpoint_path:
+        get_eval_fn(args, model_path, testloader, device)(args.evaluate_every, get_parameters(model), {})
+        exit(1)
     config = get_agg_config(model, trainloader, args.p_s)
     train_config = SimpleNamespace(
         **{
@@ -207,6 +215,8 @@ def main(args: Any) -> None:
             "lr_scheduler": args.lr_scheduler,
             "weight_decay": args.weight_decay,
             "local_epochs": args.local_epochs,
+            "lda": args.lda,
+            "dataset": args.dataset,
         }
     )
 
