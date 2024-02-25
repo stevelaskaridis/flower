@@ -184,9 +184,16 @@ def main(args: Any) -> None:
         f"{torch.__version__} and Flower {fl.__version__}"
     )
 
+    if args.lda:
+        assert('lda' in args.dataset)
+        Logger.get().info("Using LDA dataset")
+        fed_dir, globaldata_dir = prepare_dataset(args.dataset, args.data_path, lda_alpha=args.lda,
+                                                  number_of_clients=get_num_clients(args.dataset))
+        path = fed_dir
+
 
     trainloader, testloader = load_data(
-        path, cid=0, seed=args.manual_seed, train_bs=args.batch_size
+        args.dataset, path, cid=0, seed=args.manual_seed, train_bs=args.batch_size
     )
     NUM_CLIENTS = args.num_clients
     if args.client_tier_allocation == "uniform":

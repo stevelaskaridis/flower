@@ -13,6 +13,8 @@ from torch.nn import Module
 from torch.utils.data import DataLoader
 
 from .dataset import load_data
+from .datasets import get_num_clients
+from .datasets.utils import prepare_dataset
 from .models import get_net, test, train
 from .od.layers import ODBatchNorm2d, ODConv2d, ODLinear
 from .od.samplers import ODSampler
@@ -141,8 +143,14 @@ class FjORDClient(
         self.cid = cid
         self.p_s = p_s
         self.net = get_net(model_name, p_s, device)
+
+        if train_config.lda:
+            fed_dir, globaldata_dir = prepare_dataset(train_config.dataset, data_path, lda_alpha=train_config.lda,
+                                                      number_of_clients=get_num_clients(train_config.dataset))
+            data_path = fed_dir
+
         self.trainloader, self.valloader = load_data(
-            data_path, int(cid), train_config.batch_size, seed
+            train_config.dataset, data_path, int(cid), train_config.batch_size, seed
         )
 
         self.know_distill = know_distill

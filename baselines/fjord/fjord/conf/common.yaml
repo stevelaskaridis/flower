@@ -5,11 +5,12 @@ logfile: run.log
 
 manual_seed: 123
 model: resnet18
-dataset: cifar10
+lda: NULL
 num_clients: 100
 data_path: "./data"
 num_workers: 4
 evaluate_every: 10
+eval_every_client: false
 
 cuda: true
 batch_size: 32

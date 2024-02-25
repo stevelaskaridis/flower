@@ -2,6 +2,7 @@
 
 import random
 from typing import Optional, Tuple
+from pathlib import Path
 
 import numpy as np
 import torch
@@ -10,6 +11,8 @@ from torch.nn import Module
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
 from torchvision.datasets import CIFAR10
+
+from .datasets.utils import get_dataset_class_from_string
 
 CIFAR_NORMALIZATION = ((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
 
@@ -135,7 +138,7 @@ def get_transforms() -> Tuple[transforms.Compose, transforms.Compose]:
 
 
 def load_data(
-    path: str, cid: int, train_bs: int, seed: int, eval_bs: int = 1024
+    dataset: str, path: str, cid: int, train_bs: int, seed: int, eval_bs: int = 1024
 ) -> Tuple[DataLoader, DataLoader]:
     """Load the CIFAR10 dataset.
 
@@ -156,12 +159,23 @@ def load_data(
     g.manual_seed(seed)
     transform_train, transform_test = get_transforms()
 
-    fl_dataset = FLCifar10(
-        root=path, train=True, download=True, transform=transform_train
-    )
+    if dataset == 'cifar10_lda':
+        dataset_class = get_dataset_class_from_string(dataset)
+        trainset = dataset_class.get_dataset(path, cid=cid,
+                                             partition='train',
+                                             transforms=transform_train,
+                                             num_classes=dataset_class.num_classes)
+        testset = dataset_class.get_dataset(Path(path), cid=cid,
+                                            partition='test',
+                                            transforms=transform_test,
+                                            num_classes=dataset_class.num_classes)
+    if dataset == "cifar10":
+        fl_dataset = FLCifar10(
+            root=path, train=True, download=True, transform=transform_train
+        )
 
-    trainset = FLCifar10Client(fl_dataset, client_id=cid)
-    testset = CIFAR10(root=path, train=False, download=True, transform=transform_test)
+        trainset = FLCifar10Client(fl_dataset, client_id=cid)
+        testset = CIFAR10(root=path, train=False, download=True, transform=transform_test)
 
     train_loader = DataLoader(
         trainset,
