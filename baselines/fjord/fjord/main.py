@@ -193,7 +193,7 @@ def main(args: Any) -> None:
 
 
     trainloader, testloader = load_data(
-        args.dataset, path, cid=0, seed=args.manual_seed, train_bs=args.batch_size
+        args.dataset, globaldata_dir, cid=None, seed=args.manual_seed, train_bs=args.batch_size
     )
     NUM_CLIENTS = args.num_clients
     if args.client_tier_allocation == "uniform":

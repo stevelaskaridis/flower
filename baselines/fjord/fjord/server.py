@@ -51,6 +51,9 @@ def get_eval_fn(
                         )
             else:
                 # Update model with the latest parameters
+                _, testloader = load_data(
+                    args.dataset, globaldata_dir, cid=None, seed=args.manual_seed, train_bs=args.batch_size
+                )
                 losses, accuracies = test(net, testloader, args.p_s)
                 avg_loss = sum(losses) / len(losses)
                 for p, loss, accuracy in zip(args.p_s, losses, accuracies):
