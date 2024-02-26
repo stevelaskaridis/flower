@@ -184,7 +184,7 @@ def get_net(
         net = ResNet18(od=True, p_s=p_s).to(device)
         if checkpoint:
             Logger.get().info(f"Loading model from {checkpoint}")
-            net.load_state_dict(torch.load(checkpoint))
+            net.load_state_dict(torch.load(checkpoint, map_location=device))
     else:
         raise ValueError(f"Model {model_name} is not supported")
 
